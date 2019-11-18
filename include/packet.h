@@ -1,6 +1,8 @@
 #pragma once
 
 #include <pcap.h>
+#include <string>
+using namespace std;
 
 #define HW_ADDR_LEN         6
 #define PROTO_ADDR_LEN      4
@@ -12,6 +14,10 @@
 
 // Maximum Transmission Units through Ethernet
 #define MTU     1500
+
+// For extract_host
+#define EXT_THRESHOLD   100
+#define HOSTNAME_SZ     100
 
 typedef u_int8_t    BYTE;
 typedef u_int16_t   WORD;
@@ -43,5 +49,6 @@ struct tcp_hdr {
     WORD checksum, urg_ptr;
 };
 
-bool is_HTTP(const BYTE *data);
-bool check_host(const BYTE *data, const BYTE* host);
+string extract_host(const BYTE *http_field);
+bool is_HTTP(const BYTE *data, BYTE *hostname);
+bool check_host(const BYTE *data, const BYTE* host, int host_len);

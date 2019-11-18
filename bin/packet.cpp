@@ -1,10 +1,25 @@
-#include <glog/logging.h>
 #include <arpa/inet.h>
 #include <cstring>
-
+#include <iostream>
 #include "packet.h"
+using namespace std;
 
-bool is_HTTP(const BYTE *data) {
+string extract_host(const BYTE *http_field) {
+    string ret = "";
+    int idx = 0;
+    while(true) {
+        if(!memcmp(http_field+idx, "Host: ", strlen("Host: "))) {
+            idx += 6;
+            for(int i=0;memcmp(http_field+idx+i, "\x0D\x0A", 2);++i)
+                ret += (unsigned char)http_field[idx+i];
+        }
+        idx += 1;
+        if(idx > EXT_THRESHOLD) break;
+    }
+    return ret;
+}
+
+bool is_HTTP(const BYTE *data, BYTE *hostname) {
     const char* http_methods[HTTP_METHODS_NUM] = {
         "GET", "POST", "HEAD", "PUT", "DELETE", "OPTIONS"
     };
@@ -19,6 +34,8 @@ bool is_HTTP(const BYTE *data) {
             const BYTE *app_layer = (const BYTE*)(data + ETH_SZ + ip_hlen + tcp_hlen);
             for(int i=0;i<HTTP_METHODS_NUM;++i) {
                 if(!memcmp(app_layer, http_methods[i], strlen(http_methods[i]))) {
+                    string host = extract_host(app_layer);
+                    memcpy(hostname, host.c_str(), host.length());
                     return true;
                 }
             }
@@ -27,8 +44,12 @@ bool is_HTTP(const BYTE *data) {
     return false;
 }
 
-bool check_host(const BYTE *data, const BYTE *host) {
-    if(is_HTTP(data))
-        return true;
+bool check_host(const BYTE *data, const BYTE *host, int host_len) {
+    BYTE *hostname = (BYTE*)malloc(HOSTNAME_SZ);
+    if(is_HTTP(data, hostname)) {
+        if(!memcmp(hostname, host, host_len))
+            return true;
+    }
+    free(hostname);
     return false;
 }

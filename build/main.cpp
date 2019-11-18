@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
         // 2. Analyze whether block is required
-        if(check_host((const BYTE*)data, (const BYTE*)argv[2])) {
+        if(check_host((const BYTE*)data, (const BYTE*)argv[2], strlen((const char*)argv[2]))) {
             LOG(WARNING) << "Block signal sent";
         }
     }
