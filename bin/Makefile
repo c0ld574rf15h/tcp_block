@@ -1,6 +1,6 @@
 CC = g++
 ARC = libtcpblock.a
-OBJ = packet.o
+OBJ = packet.o block_utils.o
 
 $(ARC) : $(OBJ)
 	$(AR) $(ARFLAGS) $@ $(OBJ)

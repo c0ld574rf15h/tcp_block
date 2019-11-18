@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "packet.h"
+#include "block_utils.h"
 
 using namespace std;
 
@@ -35,6 +36,9 @@ int main(int argc, char* argv[]) {
         // 2. Analyze whether block is required
         if(check_host((const BYTE*)data, (const BYTE*)argv[2], strlen((const char*)argv[2]))) {
             LOG(WARNING) << "Block signal sent";
+            if(!send_block(data, RST_FLAG, FWD) && !send_block(data, RST_FLAG, BWD)) {
+                LOG(ERROR) << "Something got wrong while sending block packets";
+            }
         }
     }
     
