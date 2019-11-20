@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
 #include <cstring>
+#include <cstdlib>
 #include <iostream>
 #include "packet.h"
 using namespace std;
