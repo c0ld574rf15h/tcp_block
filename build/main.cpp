@@ -37,7 +37,9 @@ int main(int argc, char* argv[]) {
         // 2. Analyze whether block is required
         if(check_host((const BYTE*)data, (const BYTE*)argv[2], strlen((const char*)argv[2]))) {
             LOG(WARNING) << "Block signal sent";
-            if(!send_block(handle, data, RST, FWD) && !send_block(handle, data, RST, BWD)) {
+            // Log an error if any of the two fails
+            if(!send_block(handle, data, RST, FWD) ||
+               !send_block(handle, data, RST, BWD)) {
                 LOG(ERROR) << "Something got wrong while sending block packets";
             }
         }

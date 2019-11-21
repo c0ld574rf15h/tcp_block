@@ -13,13 +13,16 @@
 #define SYN  0X02
 #define FIN  0X01
 
+#define SEND_SUCCESS    0
+
 struct pseudo_hdr {
     BYTE src_ip[HW_ADDR_LEN], dst_ip[HW_ADDR_LEN];
     BYTE reserved, protocol;
     WORD tcp_len;
 };
 
+void swap_range(BYTE *first, BYTE *second, DWORD size);
 WORD tcp_checksum(tcp_hdr *tcp, ip_hdr *ip);
 WORD ip_checksum(tcp_hdr *ip);
 void reverse_src_dst(eth_hdr *eth, ip_hdr *ip, tcp_hdr *tcp);
-bool send_block(pcap_t *handle, const BYTE *data, BYTE flag, BYTE direction);
+bool send_block(pcap_t *handle, BYTE *data, BYTE flag, BYTE direction);
