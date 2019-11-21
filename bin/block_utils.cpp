@@ -18,8 +18,6 @@ WORD tcp_checksum(tcp_hdr *tcp, ip_hdr *ip) {
     tcp->checksum = 0;
     DWORD checksum = 0;
 
-    cout << "TCP header len : " << tcp_hlen << '\n';
-
     pseudo_hdr *p_hdr;
     memcpy(p_hdr->src_ip, ip->src_addr, sizeof(PROTO_ADDR_LEN));
     memcpy(p_hdr->dst_ip, ip->dst_addr, sizeof(PROTO_ADDR_LEN));
@@ -66,16 +64,16 @@ bool send_block(pcap_t *handle, BYTE *data, BYTE flag, BYTE direction) {
     if(direction == FWD) {
         if(flag == RST) {   
             // 1. Set the flags
-            tcp->flags = RST;
+            tcp->flags = (ACK | RST);
             // 2. Compute the new checksum value; TCP and IP
             tcp->checksum = htons(tcp_checksum(tcp, ip));
             ip->checksum = htons(ip_checksum(ip, ip_hlen));
-            return pcap_sendpacket(handle, data, ETH_SZ+ip->total_len) == SEND_SUCCESS;
+            return pcap_sendpacket(handle, data, ETH_SZ+ntohs(ip->total_len)) == SEND_SUCCESS;
         } else if(flag == FIN) {
             tcp->flags = (ACK | FIN);
             tcp->checksum = htons(tcp_checksum(tcp, ip));
             ip->checksum = htons(ip_checksum(ip, ip_hlen));
-            return pcap_sendpacket(handle, data, ETH_SZ+ip->total_len) == SEND_SUCCESS;
+            return pcap_sendpacket(handle, data, ETH_SZ+ntohs(ip->total_len)) == SEND_SUCCESS;
         } else {
             return false;
         }
@@ -85,15 +83,15 @@ bool send_block(pcap_t *handle, BYTE *data, BYTE flag, BYTE direction) {
         swap_range((BYTE*)&(tcp->src_port), (BYTE*)&(tcp->dst_port), sizeof(WORD));     // Swap port numbers
         swap_range((BYTE*)&(tcp->seq_num), (BYTE*)&(tcp->ack_num), sizeof(DWORD));      // Swap seq & ack numbers
         if(flag==RST) {
-            tcp->flags = RST;
+            tcp->flags = (ACK | RST);
             tcp->checksum = htons(tcp_checksum(tcp, ip));
             ip->checksum = htons(ip_checksum(ip, ip_hlen));
-            return pcap_sendpacket(handle, data, ETH_SZ+ip->total_len) == SEND_SUCCESS;
+            return pcap_sendpacket(handle, data, ETH_SZ+ntohs(ip->total_len)) == SEND_SUCCESS;
         } else if(flag==FIN) {
             tcp->flags = (ACK | FIN);
             tcp->checksum = htons(tcp_checksum(tcp, ip));
             ip->checksum = htons(ip_checksum(ip, ip_hlen));
-            return pcap_sendpacket(handle, data, ETH_SZ+ip->total_len) == SEND_SUCCESS;
+            return pcap_sendpacket(handle, data, ETH_SZ+ntohs(ip->total_len)) == SEND_SUCCESS;
         } else {
             return false;
         }

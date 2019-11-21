@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
 
     char errbuf[PCAP_ERRBUF_SIZE];
     char *dev = argv[1];
-    pcap_t* handle = pcap_open_live(dev, BUFSIZ, 1, 1000, errbuf);
+    pcap_t* handle = pcap_open_live(dev, BUFSIZ, 1, 10, errbuf);
     if(handle == NULL) {
         LOG(ERROR) << "Couldn't open device " << errbuf;
     } else {
@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
         if(check_host((const BYTE*)data, (const BYTE*)argv[2], strlen((const char*)argv[2]))) {
             LOG(WARNING) << "Block signal sent";
             // Log an error if any of the two fails
-            if(!send_block(handle, data, RST, FWD) ||
-               !send_block(handle, data, RST, BWD)) {
+            if(!send_block(handle, data, FIN, FWD) ||
+               !send_block(handle, data, FIN, BWD)) {
                 LOG(ERROR) << "Something got wrong while sending block packets";
             }
         }
